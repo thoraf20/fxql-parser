@@ -11,7 +11,7 @@ export const typeOrmConfig: TypeOrmModuleOptions = {
   password: `${process.env.DB_PASS}`,
   database: process.env.DB_NAME,
   entities: ['dist/**/*.entity.js'],
-  synchronize: process.env.NODE_ENV === 'development' ? true : false,
+  synchronize: true,
   autoLoadEntities: true,
   ssl:
     process.env.NODE_ENV === 'development'
