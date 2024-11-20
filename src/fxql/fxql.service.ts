@@ -76,7 +76,7 @@ export class FxqlService {
         destinationCurrency: value.destinationCurrency,
         buyRate: value.buyRate,
         sellRate: value.sellRate,
-        cap: value.cap,
+        capAmount: value.cap,
       }
     })
 

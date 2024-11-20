@@ -24,7 +24,7 @@ export class FxqlStatement {
   sellRate: number;
 
   @Column('int')
-  cap: number;
+  capAmount: number;
 
   @CreateDateColumn()
   createdAt: Date;
