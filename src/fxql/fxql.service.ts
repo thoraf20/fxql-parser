@@ -2,10 +2,10 @@
 import { Injectable, HttpStatus } from '@nestjs/common';
 import { FxqlStatementDto } from './dto/fxql-statement.dto';
 import { FxqlStatement } from './entities/fxql-statement.entity';
-import { Repository } from 'typeorm';
+import { DeepPartial, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { validate } from 'class-validator';
-import { handleValidationErrors, mapErrorCode } from 'src/helper';
+import { handleValidationErrors, mapErrorCode } from '../helper';
 
 interface ParsedFxqlStatement {
   sourceCurrency: string;
@@ -24,23 +24,24 @@ export class FxqlService {
     private readonly fxqlRepository: Repository<FxqlStatement>,
   ) {}
 
-  async saveFxql(fxql: string): Promise<FxqlStatement> {
+  async saveFxql(fxql: string): Promise<FxqlStatement[]> {
     const parsed = this.parseFxql(fxql);
     const fxqlDto = this.transformParsedData(parsed);
 
-    // Validate the parsed DTO
-    const errors = await validate(fxqlDto);
-
-    if (errors.length > 0) {
-      handleValidationErrors(errors);
+    for (const dto of fxqlDto) {
+      const errors = await validate(dto);
+      if (errors.length > 0) {
+        handleValidationErrors(errors);
+      }
     }
 
-    return await this.fxqlRepository.save(fxqlDto);
+    // return await this.fxqlRepository.save(fxqlDto);
+    return await this.fxqlRepository.save(fxqlDto as DeepPartial<FxqlStatement[]>); 
+
   }
 
   private parseFxql(fxql: string): ParsedFxqlStatement[] {
     const cleanedFxql = fxql.replace(/\\n/g, '\n').trim();
-
     const statements = cleanedFxql.split(/\n\n/);
 
     if (statements.length > this.MAX_PAIRS_PER_REQUEST) {
@@ -88,7 +89,7 @@ export class FxqlService {
     return parsedStatements;
   }
 
-  private transformParsedData(data: Record<string, any>): FxqlStatementDto {
+  private transformParsedData(data: Record<string, any>): FxqlStatementDto[] {
     const transformData = data.map((value) => {
       return {
         sourceCurrency: value.sourceCurrency,

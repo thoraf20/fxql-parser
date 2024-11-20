@@ -2,7 +2,7 @@
 import { Controller, Post, Body, HttpCode, HttpStatus, Logger } from '@nestjs/common';
 import { FxqlService } from './fxql.service';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
-import { ErrorResponseObject, SuccessResponseObject } from 'src/helper';
+import { ErrorResponseObject, SuccessResponseObject } from '../helper';
 import { FxqlInputDto } from './dto/fxql-statement.dto';
 
 @ApiTags('Mira')
