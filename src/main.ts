@@ -5,6 +5,8 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { AppModule } from './app.module';
 import * as basicAuth from 'express-basic-auth';
 import * as bodyParser from 'body-parser';
+import { config } from 'dotenv';
+config();
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, { cors: true });

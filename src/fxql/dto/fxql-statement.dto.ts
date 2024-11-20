@@ -1,5 +1,6 @@
 /* eslint-disable prettier/prettier */
 // src/fxql/dto/fxql-statement.dto.ts
+import { ApiProperty } from '@nestjs/swagger';
 import {
   IsString,
   Matches,
@@ -36,4 +37,10 @@ export class FxqlStatementDto {
   @IsInt({ message: 'CAP must be a whole number.' })
   @Min(0, { message: 'CAP must be 0 or greater.' })
   cap: number;
+}
+
+export class FxqlInputDto {
+  @ApiProperty()
+  @IsString()
+  FXQL: string;
 }

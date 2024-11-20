@@ -11,11 +11,12 @@ export const typeOrmConfig: TypeOrmModuleOptions = {
   password: `${process.env.DB_PASS}`,
   database: process.env.DB_NAME,
   entities: ['dist/**/*.entity.js'],
-  synchronize: true,
+  synchronize: process.env.NODE_ENV === 'development' ? true : false,
   autoLoadEntities: true,
-  ssl: {
-    rejectUnauthorized: process.env.NODE_ENV === 'local' ? true : false,
-  },
+  ssl:
+    process.env.NODE_ENV === 'development'
+      ? false
+      : { rejectUnauthorized: false },
   extra: {
     charset: 'utf8mb4_unicode_ci',
   },
