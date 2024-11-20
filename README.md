@@ -14,13 +14,13 @@ The FXQL Parser App is a NestJS-based application designed to process, validate,
 - Provides comprehensive error messages with line numbers and character positions for invalid inputs.
 - Enforces rate limiting to prevent abuse.
 - Includes input sanitization for secure and clean data handling.
-- Fully tested with unit and integration.
+- Fully tested with unit.
 
 ## Technology Stack
 - Framework: NestJS
 - Language: TypeScript
 - Database: PostgreSQL
-- Testing: Jest (unit and integration tests)
+- Testing: Jest (unit tests)
 
 ## Project setup
 
@@ -42,13 +42,18 @@ $ npm install
 
 3. Configure the environment variables:
 - Create an .env file in the root directory:
-  env
-  Copy code:
 ```bash
-DATABASE_URL=postgres://username:password@localhost:5432/fxql
-PORT=3000
 RATE_LIMIT_TTL=60
 RATE_LIMIT_LIMIT=10
+NODE_ENV='development'
+PORT=
+DB_HOST='localhost'
+DB_PORT=
+DB_USER=
+DB_PASS=
+DB_NAME=
+SWAGGER_USERNAME=admin
+SWAGGER_PASS=admin
 ```
 -Replace username and password with your PostgreSQL credentials.
 - Adjust the port and rate limiting settings as needed.
@@ -61,9 +66,6 @@ $ npm run start
 
 # watch mode
 $ npm run start:dev
-
-# production mode
-$ npm run start:prod
 ```
 
 ## Run tests
@@ -71,9 +73,6 @@ $ npm run start:prod
 ```bash
 # unit tests
 $ npm run test
-
-# e2e tests
-$ npm run test:e2e
 
 ```
 
