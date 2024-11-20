@@ -50,33 +50,40 @@ export class FxqlService {
       );
     }
 
-    const parsedStatements: ParsedFxqlStatement[] = statements.map(
-      (statement) => {
+    const parsedStatements: ParsedFxqlStatement[] = [];
+
+    statements.forEach((statement, index) => {
+      const lineNumber = index + 1;
+
+      try {
         // Match the structure of a single FXQL statement
-        const regex =
-          /^(\w{3})-(\w{3})\s*{\s*BUY\s+([\d.]+)\s+SELL\s+([\d.]+)\s+CAP\s+(\d+)\s*}$/m;
+        const regex =/^(\w{3})-(\w{3})\s*{\s*BUY\s+([\d.]+)\s+SELL\s+([\d.]+)\s+CAP\s+(\d+)\s*}$/m;
         const match = statement.match(regex);
 
         if (!match) {
+          const charPosition = this.findCharPosition(statement);
           mapErrorCode(
             `${HttpStatus.BAD_REQUEST}`,
-            `Invalid FXQL statement: ${statement}`,
+            `Invalid FXQL syntax on line ${lineNumber}, character ${charPosition}: "${statement}"`,
           );
         }
 
-        const [, sourceCurrency, destinationCurrency, buyRate, sellRate, cap] =
-          match;
+        const [, sourceCurrency, destinationCurrency, buyRate, sellRate, cap] = match;
 
-        // Return the parsed statement
-        return {
+        parsedStatements.push({
           sourceCurrency,
           destinationCurrency,
           buyRate: parseFloat(buyRate),
           sellRate: parseFloat(sellRate),
           cap: parseInt(cap, 10),
-        };
-      },
-    );
+        });
+      } catch (error) {
+        mapErrorCode(
+          `${HttpStatus.BAD_REQUEST}`,
+          `${error.message} at line ${lineNumber}.`,
+        );
+      }
+    });
 
     return parsedStatements;
   }
@@ -93,5 +100,12 @@ export class FxqlService {
     });
 
     return transformData;
+  }
+
+  // Helper to determine the position of invalid syntax
+  private findCharPosition(statement: string): number {
+    // Example: Find the position of the first non-whitespace character
+    const invalidCharMatch = statement.match(/[^a-zA-Z0-9\s{}.-]/);
+    return invalidCharMatch ? invalidCharMatch.index + 1 : 1;
   }
 }

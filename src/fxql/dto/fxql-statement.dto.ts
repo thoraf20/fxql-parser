@@ -1,6 +1,7 @@
 /* eslint-disable prettier/prettier */
 // src/fxql/dto/fxql-statement.dto.ts
 import { ApiProperty } from '@nestjs/swagger';
+import { Transform } from 'class-transformer';
 import {
   IsString,
   Matches,
@@ -11,12 +12,14 @@ import {
 
 export class FxqlStatementDto {
   @IsString()
+  @Transform(({ value }) => value.trim())
   @Matches(/^[A-Z]{3}$/, {
     message: 'Source currency must be 3 uppercase letters.',
   })
   sourceCurrency: string;
 
   @IsString()
+  @Transform(({ value }) => value.trim())
   @Matches(/^[A-Z]{3}$/, {
     message: 'Destination currency must be 3 uppercase letters.',
   })

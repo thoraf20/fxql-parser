@@ -20,7 +20,7 @@ export class FxqlController {
       const savedStatement = await this.fxqlService.saveFxql(body.FXQL);
       return new SuccessResponseObject(
         'Rate parsed successfully.',
-        "FXQL-200",
+        'FXQL-200',
         savedStatement,
       );
     } catch (error) {
