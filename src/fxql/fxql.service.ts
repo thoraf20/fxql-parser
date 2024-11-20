@@ -1,11 +1,11 @@
 /* eslint-disable prettier/prettier */
-import { Injectable, BadRequestException } from '@nestjs/common';
+import { Injectable, HttpStatus } from '@nestjs/common';
 import { FxqlStatementDto } from './dto/fxql-statement.dto';
 import { FxqlStatement } from './entities/fxql-statement.entity';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { validate } from 'class-validator';
-import { handleValidationErrors } from 'src/helper';
+import { handleValidationErrors, mapErrorCode } from 'src/helper';
 
 interface ParsedFxqlStatement {
   sourceCurrency: string;
@@ -17,6 +17,8 @@ interface ParsedFxqlStatement {
 
 @Injectable()
 export class FxqlService {
+  private readonly MAX_PAIRS_PER_REQUEST = 1000;
+
   constructor(
     @InjectRepository(FxqlStatement)
     private readonly fxqlRepository: Repository<FxqlStatement>,
@@ -41,6 +43,13 @@ export class FxqlService {
 
     const statements = cleanedFxql.split(/\n\n/);
 
+    if (statements.length > this.MAX_PAIRS_PER_REQUEST) {
+      mapErrorCode(
+        `${HttpStatus.BAD_REQUEST}`,
+        `Maximum allowed currency pairs is ${this.MAX_PAIRS_PER_REQUEST}, gotten ${statements.length} in the request.`,
+      );
+    }
+
     const parsedStatements: ParsedFxqlStatement[] = statements.map(
       (statement) => {
         // Match the structure of a single FXQL statement
@@ -49,7 +58,10 @@ export class FxqlService {
         const match = statement.match(regex);
 
         if (!match) {
-          throw new BadRequestException(`Invalid FXQL statement: ${statement}`);
+          mapErrorCode(
+            `${HttpStatus.BAD_REQUEST}`,
+            `Invalid FXQL statement: ${statement}`,
+          );
         }
 
         const [, sourceCurrency, destinationCurrency, buyRate, sellRate, cap] =
@@ -77,9 +89,9 @@ export class FxqlService {
         buyRate: value.buyRate,
         sellRate: value.sellRate,
         capAmount: value.cap,
-      }
-    })
+      };
+    });
 
-    return transformData
+    return transformData;
   }
 }

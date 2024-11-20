@@ -1,6 +1,13 @@
 /* eslint-disable prettier/prettier */
 import { ValidationError } from 'class-validator';
-import { BadRequestException, ConflictException, InternalServerErrorException, NotFoundException, UnprocessableEntityException } from '@nestjs/common';
+import {
+  HttpStatus, 
+  BadRequestException,
+  ConflictException,
+  InternalServerErrorException,
+  NotFoundException,
+  UnprocessableEntityException,
+} from '@nestjs/common';
 
 type Data = any | null;
 
@@ -22,7 +29,7 @@ export function handleValidationErrors(errors: ValidationError[]): void {
     .map((error) => Object.values(error.constraints || {}).join(', '))
     .join('; ');
 
-  throw new BadRequestException(errorMessages);
+    mapErrorCode(`${HttpStatus.BAD_REQUEST}`, errorMessages);
 }
 
 export class SuccessResponseObject extends ResponseObject {
@@ -36,14 +43,45 @@ export const ErrorResponseObject = (error) => {
     throw new ConflictException(error.message);
   }
   if (error instanceof BadRequestException) {
-    throw new BadRequestException(error.message);
+    mapErrorCode( `${HttpStatus.BAD_REQUEST}`, error.message);
   }
   if (error instanceof NotFoundException) {
-    throw new NotFoundException(error.message);
+    mapErrorCode(`${HttpStatus.NOT_FOUND}`, error.message);
   }
   if (error instanceof UnprocessableEntityException) {
-    throw new UnprocessableEntityException(error.message);
+    mapErrorCode(`${HttpStatus.UNPROCESSABLE_ENTITY}`, error.message);
   }
 
   throw new InternalServerErrorException(error.message);
 };
+
+
+/**
+ * Utility to map error codes and messages into a standardized format
+ * @param status - HTTP status code
+ * @param customCode - Custom FXQL error code
+ * @param message - Error message
+ */
+export function mapErrorCode(
+  // status: HttpStatus,
+  customCode: string,
+  message: string,
+): never {
+  const errorResponse = {
+    code: `FXQL-${customCode}`,
+    message,
+  };
+
+  switch (customCode) {
+    case `${HttpStatus.BAD_REQUEST}`:
+      throw new BadRequestException(errorResponse);
+    case `${HttpStatus.NOT_FOUND}`:
+      throw new NotFoundException(errorResponse);
+    case `${HttpStatus.CONFLICT}`:
+      throw new ConflictException(errorResponse);
+    case `${HttpStatus.INTERNAL_SERVER_ERROR}`:
+    default:
+      throw new InternalServerErrorException(errorResponse);
+  }
+}
+
